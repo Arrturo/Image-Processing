@@ -1,5 +1,6 @@
 from matplotlib.image import imsave, imread
 from matplotlib.pyplot import imshow
+from matplotlib.colors import hsv_to_rgb
 from enum import Enum
 import numpy as np
 np.seterr(over='ignore')
@@ -34,7 +35,11 @@ class BaseImage:
         """
         metoda wyswietlajaca obraz znajdujacy sie w atrybucie data
         """
-        imshow(self.data)
+        match self.color_model:
+            case 0: imshow(self.data)
+            case 1: imshow(hsv_to_rgb(self.data))
+            # case 2: imshow(self.data)
+            # case 3: imshow((self.data))
 
     def get_layer(self, layer_id: int) -> 'BaseImage':
         """
@@ -56,8 +61,8 @@ class BaseImage:
 
             for j in range(R.shape[0]):
                 for i in range(R.shape[1]):
-                    M = max(R[i, j].max(), G[i, j].max(), B[i, j].max())
-                    m = min(R[i, j].min(), G[i, j].min(), B[i, j].min())
+                    M = max(R[i, j], G[i, j], B[i, j])
+                    m = min(R[i, j], G[i, j], B[i, j])
                     V[i, j] = M / 255
                     if M > 0:
                         S[i, j] = 1 - (m / M)
@@ -66,12 +71,12 @@ class BaseImage:
                     nominator = (R[i, j] - (0.5 * G[i, j]) - (0.5 * B[i, j]))
                     denominator = (R[i, j] ** 2) + (G[i, j] ** 2) + (B[i, j] ** 2) - (R[i, j] * G[i, j]) - (R[i, j] * B[i, j]) - (G[i, j] * B[i, j])
                     if G[i, j] >= B[i, j]:
-                        H[i, j] = np.arccos(nominator / np.sqrt(denominator))
+                        H[i, j] = np.int16(np.arccos(nominator / np.sqrt(denominator)))
                     else:
-                        H[i, j] = 360 - np.arccos(nominator / np.sqrt(denominator))
-            self.data = np.stack((H, S, V), axis=-1)
+                        H[i, j] = np.int16(360 - np.arccos(nominator / np.sqrt(denominator)))
+            self.data = np.dstack((H, S, V), axis=-1)
             self.color_model = 1
-            return self.data
+            return self
 
     def to_hsi(self) -> 'BaseImage':
         """
@@ -125,15 +130,15 @@ class BaseImage:
                     L[i, j] = (0.5 * (M + m)) / 255
 
                     if L[i, j] > 0:
-                        S[i, j] = d / (1 - abs(2 * L[i, j] - 1))
+                        S[i, j] = d / (1 - 2 * L[i, j] - 1)
                     else:
                         S[i, j] = 0
                     nominator = (R[i, j] - (0.5 * G[i, j]) - (0.5 * B[i, j]))
                     denominator = (R[i, j] ** 2) + (G[i, j] ** 2) + (B[i, j] ** 2) - (R[i, j] * G[i, j]) - (R[i, j] * B[i, j]) - (G[i, j] * B[i, j])
                     if G[i, j] >= B[i, j]:
-                        H[i, j] = np.arccos(nominator / np.sqrt(denominator))
+                        H[i, j] = np.int16(np.arccos(nominator / np.sqrt(denominator)))
                     else:
-                        H[i, j] = 360 - np.arccos(nominator / np.sqrt(denominator))
+                        H[i, j] = np.int16(360 - np.arccos(nominator / np.sqrt(denominator)))
             self.data = np.stack((H, S, L), axis=-1)
 
         self.color_model = 3
@@ -158,12 +163,12 @@ class BaseImage:
                 for j in range(self.data.shape[1]):
                     M = 255 * V[i, j]
                     m = M * (1 - S[i, j])
-                    z = M - m[i, j] * 1 - (abs((H[i, j] / 60) % 2) - 1)
+                    z = (M - m) * 1 - (abs((H[i, j] / 60) % 2) - 1)
 
                     if 0 <= H[i, j] < 60:
-                        R[i, j] = M[i, j]
-                        G[i, j] = z + m[i, j]
-                        B[i, j] = m[i, j]
+                        R[i, j] = M
+                        G[i, j] = z + m
+                        B[i, j] = m
 
                     if 60 <= H[i, j] < 120:
                         R[i, j] = z + m
@@ -189,7 +194,7 @@ class BaseImage:
                         R[i, j] = M
                         G[i, j] = m
                         B[i, j] = z + m
-            self.data = np.dstack((R, G, B))
+            self.data = np.dstack((R, G, B)).astype('uint16')
 
         if self.color_model == 2:
             H, S, I = np.squeeze(np.dsplit(self.data, self.data.shape[-1]))
@@ -202,33 +207,33 @@ class BaseImage:
                 for j in range(self.data.shape[1]):
 
                     if H[i, j] == 0:
-                        R[i, j] = I[i, j] + 2 * I[i, j] * S[i, j]
+                        R[i, j] = round(I[i, j] + 2 * I[i, j] * S[i, j])
 
-                    if 0 < H < 120:
-                        R[i, j] = I[i, j] + I[i, j] * S[i, j] * np.cos(H[i, j]) / np.cos(60 - H[i, j])
-                        G[i, j] = I[i, j] + I[i, j] * S[i, j] * (1 - np.cos(H[i, j]) / np.cos(60 - H[i, j]))
-                        I[i, j] = I[i, j] * S[i, j]
+                    if 0 < H[i, j] < 120:
+                        R[i, j] = round(I[i, j] + I[i, j] * S[i, j] * np.cos(H[i, j]) / np.cos(60 - H[i, j]))
+                        G[i, j] = round(I[i, j] + I[i, j] * S[i, j] * (1 - np.cos(H[i, j]) / np.cos(60 - H[i, j])))
+                        I[i, j] = round(I[i, j] * S[i, j])
 
                     if H[i, j] == 120:
-                        R[i, j] = I[i, j] - I[i, j] * S[i, j]
-                        G[i, j] = I[i, j] + 2 * I[i, j] * S[i, j]
-                        B[i, j] = I[i, j] - I[i, j] * S[i, j]
+                        R[i, j] = round(I[i, j] - I[i, j] * S[i, j])
+                        G[i, j] = round(I[i, j] + 2 * I[i, j] * S[i, j])
+                        B[i, j] = round(I[i, j] - I[i, j] * S[i, j])
 
-                    if 120 < H < 240:
-                        G[i, j] = I[i, j] + I[i, j] * S[i, j] * np.cos(H[i, j] - 120) / np.cos(180 - H[i, j])
-                        B[i, j] = I[i, j] + I[i, j] * S[i, j] * (1 - np.cos(H[i, j] - 120) / np.cos(180 - H[i, j]))
-                        R[i, j] = I[i, j] - I[i, j] * S[i, j]
+                    if 120 < H[i, j] < 240:
+                        G[i, j] = round(I[i, j] + I[i, j] * S[i, j] * np.cos(H[i, j] - 120) / np.cos(180 - H[i, j]))
+                        B[i, j] = round(I[i, j] + I[i, j] * S[i, j] * (1 - np.cos(H[i, j] - 120) / np.cos(180 - H[i, j])))
+                        R[i, j] = round(I[i, j] - I[i, j] * S[i, j])
 
                     if H[i, j] == 240:
-                        R[i, j] = I[i, j] - I[i, j] * S[i, j]
-                        G[i, j] = I[i, j] - I[i, j] * S[i, j]
-                        B[i, j] = I[i, j] + 2 * I[i, j] * S[i, j]
+                        R[i, j] = round(I[i, j] - I[i, j] * S[i, j])
+                        G[i, j] = round(I[i, j] - I[i, j] * S[i, j])
+                        B[i, j] = round(I[i, j] + 2 * I[i, j] * S[i, j])
 
                     if 240 < H[i, j] < 360:
-                        R[i, j] = I[i, j] + I[i, j] * S[i, j] * (np.cos(H[i, j] - 240) / np.cos(300 - H[i, j]))
-                        G[i, j] = I[i, j] - I[i, j] * S[i, j]
-                        B[i, j] = I[i, j] + I[i, j] * S[i, j] * (np.cos(H[i, j] - 240) / np.cos(300 - H[i, j]))
-                self.data = np.dstack((R, G, B))
+                        R[i, j] = round(I[i, j] + I[i, j] * S[i, j] * (np.cos(H[i, j] - 240) / np.cos(300 - H[i, j])))
+                        G[i, j] = round(I[i, j] - I[i, j] * S[i, j])
+                        B[i, j] = round(I[i, j] + I[i, j] * S[i, j] * (np.cos(H[i, j] - 240) / np.cos(300 - H[i, j])))
+                self.data = np.dstack((R, G, B)).astype('uint16')
 
         if self.color_model == 3:
             H, S, L = np.squeeze(np.dsplit(self.data, self.data.shape[-1]))
@@ -273,7 +278,7 @@ class BaseImage:
                         G[i, j] = m
                         B[i, j] = (255 * x) + m
 
-                self.data = np.dstack((R, G, B))
+                self.data = np.dstack((R, G, B)).astype('uint16')
 
         self.color_model = 0
-        return self.data
+        return self
