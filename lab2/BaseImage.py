@@ -1,9 +1,7 @@
 from matplotlib.image import imsave, imread
 from matplotlib.pyplot import imshow
-from matplotlib.colors import hsv_to_rgb
 from enum import Enum
 import numpy as np
-import colorsys
 np.seterr(over='ignore')
 
 
@@ -37,11 +35,6 @@ class BaseImage:
         metoda wyswietlajaca obraz znajdujacy sie w atrybucie data
         """
         imshow(self.data)
-        # match self.color_model:
-        #     case 0: imshow(self.data)
-        #     case 1: imshow(self.data)
-        #     case 2: imshow(self.data)
-        #     case 3: imshow(self.data)
 
     def get_layer(self, layer_id: int) -> 'BaseImage':
         """
@@ -63,19 +56,23 @@ class BaseImage:
 
             for j in range(R.shape[0]):
                 for i in range(R.shape[1]):
+
                     M = max(R[i, j], G[i, j], B[i, j])
                     m = min(R[i, j], G[i, j], B[i, j])
                     V[i, j] = M / 255
+
                     if M > 0:
                         S[i, j] = 1 - (m / M)
                     else:
                         S[i, j] = 0
+
                     nominator = (R[i, j] - (0.5 * G[i, j]) - (0.5 * B[i, j]))
                     denominator = (R[i, j] ** 2) + (G[i, j] ** 2) + (B[i, j] ** 2) - (R[i, j] * G[i, j]) - (R[i, j] * B[i, j]) - (G[i, j] * B[i, j])
                     if G[i, j] >= B[i, j]:
                         H[i, j] = np.arccos(nominator / np.sqrt(denominator))
                     else:
                         H[i, j] = 360 - np.arccos(nominator / np.sqrt(denominator))
+
             self.data = np.dstack((H, S, V))
             self.color_model = 1
             return self
@@ -94,7 +91,7 @@ class BaseImage:
 
             for j in range(R.shape[0]):
                 for i in range(R.shape[1]):
-                    
+
                     H[i][j] = 0.5 * ((R[i][j] - G[i][j]) + (R[i][j] - B[i][j])) / np.sqrt((R[i][j] - G[i][j]) ** 2 + ((R[i][j] - B[i][j]) * (G[i][j] - B[i][j])))
                     H[i][j] = np.arccos(np.radians(H[i][j]))
 
@@ -122,24 +119,27 @@ class BaseImage:
             S = np.zeros((R.shape[0], R.shape[1]))
             L = np.zeros((R.shape[0], R.shape[1]))
 
-            for j in range(R.shape[0]):
-                for i in range(R.shape[1]):
+            for i in range(R.shape[0]):
+                for j in range(R.shape[1]):
                     M = max(R[i, j], G[i, j], B[i, j])
                     m = min(R[i, j], G[i, j], B[i, j])
-                    d = ((M - m) / 255)
-                    L[i, j] = (0.5 * (M + m)) / 255
+                    d = (M - m) / 255
+                    # L[i, j] = (0.5 * (M + m)) / 255
+                    L[i, j] = (M + m) / 510
 
                     if L[i, j] > 0:
-                        S[i, j] = d / (1 - 2 * L[i, j] - 1)
-                    else:
+                        S[i, j] = d / (1 - abs((2 * L[i, j]) - 1))
+                    if L[i, j] == 0:
                         S[i, j] = 0
+                        
                     nominator = (R[i, j] - (0.5 * G[i, j]) - (0.5 * B[i, j]))
                     denominator = (R[i, j] ** 2) + (G[i, j] ** 2) + (B[i, j] ** 2) - (R[i, j] * G[i, j]) - (R[i, j] * B[i, j]) - (G[i, j] * B[i, j])
                     if G[i, j] >= B[i, j]:
                         H[i, j] = np.arccos(nominator / np.sqrt(denominator))
-                    else:
+                    if B[i, j] > G[i, j]:
                         H[i, j] = 360 - np.arccos(nominator / np.sqrt(denominator))
-            self.data = np.stack((H, S, L), axis=-1)
+
+            self.data = np.dstack((H, S, L))
             self.color_model = 3
             return self
 
@@ -227,16 +227,17 @@ class BaseImage:
 
         if self.color_model == 3:
             H, S, L = np.squeeze(np.dsplit(self.data, self.data.shape[-1]))
+
             R = np.zeros((H.shape[0], H.shape[1]))
             G = np.zeros((H.shape[0], H.shape[1]))
             B = np.zeros((H.shape[0], H.shape[1]))
 
             for i in range(self.data.shape[0]):
                 for j in range(self.data.shape[1]):
-                    d = S[i, j] * (1 - abs(2 * L[i, j] - 1))
+
+                    d = S[i, j] * (1 - abs((2 * L[i, j]) - 1))
                     m = 255 * (L[i, j] - (0.5 * d))
-                    abs_ = abs(H[i, j] / 60)
-                    x = d * (1 - (abs_ % 2)) - 1
+                    x = d * (1 - abs(((H[i, j] / 60) % 2) - 1))
 
                     if 0 <= H[i, j] < 60:
                         R[i, j] = (255 * d) + m
