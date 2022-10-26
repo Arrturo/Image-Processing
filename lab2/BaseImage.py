@@ -89,8 +89,8 @@ class BaseImage:
             S = np.zeros((R.shape[0], R.shape[1]))
             I = np.zeros((R.shape[0], R.shape[1]))
 
-            for j in range(R.shape[0]):
-                for i in range(R.shape[1]):
+            for i in range(R.shape[0]):
+                for j in range(R.shape[1]):
 
                     H[i][j] = 0.5 * ((R[i][j] - G[i][j]) + (R[i][j] - B[i][j])) / np.sqrt((R[i][j] - G[i][j]) ** 2 + ((R[i][j] - B[i][j]) * (G[i][j] - B[i][j])))
                     H[i][j] = np.arccos(np.radians(H[i][j]))
@@ -124,20 +124,19 @@ class BaseImage:
                     M = max(R[i, j], G[i, j], B[i, j])
                     m = min(R[i, j], G[i, j], B[i, j])
                     d = (M - m) / 255
-                    # L[i, j] = (0.5 * (M + m)) / 255
-                    L[i, j] = (M + m) / 510
+                    L[i, j] = 0.5 * (int(M) + int(m)) / 255
 
                     if L[i, j] > 0:
-                        S[i, j] = d / (1 - abs((2 * L[i, j]) - 1))
-                    if L[i, j] == 0:
+                        S[i, j] = d / (1 - abs(2 * L[i, j] - 1))
+                    else:
                         S[i, j] = 0
                         
-                    nominator = (R[i, j] - (0.5 * G[i, j]) - (0.5 * B[i, j]))
-                    denominator = (R[i, j] ** 2) + (G[i, j] ** 2) + (B[i, j] ** 2) - (R[i, j] * G[i, j]) - (R[i, j] * B[i, j]) - (G[i, j] * B[i, j])
+                    nominator = (int(R[i, j]) - (0.5 * int(G[i, j])) - (0.5 * int(B[i, j])))
+                    denominator = (int(R[i, j]) ** 2) + (int(G[i, j]) ** 2) + (int(B[i, j]) ** 2) - (int(R[i, j]) * int(G[i, j])) - (int(R[i, j]) * int(B[i, j])) - (int(G[i, j]) * int(B[i, j]))
                     if G[i, j] >= B[i, j]:
-                        H[i, j] = np.arccos(nominator / np.sqrt(denominator))
+                        H[i, j] = np.arccos(nominator / np.sqrt(denominator)) * 180 / np.pi 
                     if B[i, j] > G[i, j]:
-                        H[i, j] = 360 - np.arccos(nominator / np.sqrt(denominator))
+                        H[i, j] = 360 - np.arccos(nominator / np.sqrt(denominator)) * 180 / np.pi 
 
             self.data = np.dstack((H, S, L))
             self.color_model = 3
