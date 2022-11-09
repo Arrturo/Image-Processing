@@ -4,6 +4,7 @@ from matplotlib.pyplot import imshow
 import numpy as np
 np.seterr(over='ignore')
 
+
 class BaseImage:
     data: np.ndarray  # tensor przechowujacy piksele obrazu
     color_model: ColorModel  # atrybut przechowujacy biezacy model barw obrazu
@@ -12,6 +13,7 @@ class BaseImage:
         """
         inicjalizator wczytujacy obraz do atrybutu data na podstawie sciezki
         """
+
         self.data = imread(path)
         self.color_model = 0
 
@@ -19,12 +21,14 @@ class BaseImage:
         """
         metoda zapisujaca obraz znajdujacy sie w atrybucie data do pliku
         """
+
         imsave(path, self.data)
 
     def show_img(self) -> None:
         """
         metoda wyswietlajaca obraz znajdujacy sie w atrybucie data
         """
+
         imshow(self.data)
         if self.color_model == 4:
             imshow(self.data, cmap='gray')
@@ -33,6 +37,7 @@ class BaseImage:
         """
         metoda zwracajaca warstwe o wskazanym indeksie
         """
+
         return self.data[:, :, layer_id]
 
     def to_hsv(self):
@@ -40,6 +45,7 @@ class BaseImage:
         metoda dokonujaca konwersji obrazu w atrybucie data do modelu hsv
         metoda zwraca nowy obiekt klasy image zawierajacy obraz w docelowym modelu barw
         """
+
         if self.color_model == 0:
             R, G, B = np.squeeze(np.dsplit(self.data, self.data.shape[-1]))
             
