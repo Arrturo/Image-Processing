@@ -9,14 +9,15 @@ class Histogram:
     """
     values: np.ndarray  # atrybut przechowujacy wartosci histogramu danego obrazu
 
-    def __init__(self, photo: BaseImage) -> None:
+    def __init__(self, photo: GrayScaleTransform) -> None:
         self.color_model = photo.color_model
+
         if self.color_model == 4:
             self.values, self.bin_edges = np.histogram(photo.data, bins=256, range=(0, 256))
 
         if self.color_model == 0:
             self.values = np.zeros((256, 3))
-            for layer_id in range(3):
+            for layer_id in range(self.values.shape[1]):
                 self.values[..., layer_id], self.bin_edges = np.histogram(photo.data[..., layer_id], bins=256, range=(0, 256))
 
     def plot(self) -> None:

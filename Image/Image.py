@@ -1,5 +1,5 @@
 from ImageComparison import *
-
+from GrayScaleTransform import *
 
 class Image(GrayScaleTransform, ImageComparison):
     """

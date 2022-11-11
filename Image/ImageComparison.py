@@ -16,21 +16,23 @@ class ImageComparison(BaseImage):
 
         return Histogram(self)
 
-    def compare_to(self, other: BaseImage, method: ImageDiffMethod) -> float:
+    def compare_to(self, other: GrayScaleTransform, method: ImageDiffMethod) -> float:
         """
         metoda zwracajaca mse lub rmse dla dwoch obrazow
         """
 
-        first_photo = self.histogram().values
-        second_photo = Histogram(other).values
-        mse = float()
+        first_photo = self.to_gray().histogram().values
+        second_photo = other.to_gray().histogram().values
 
-        if method == 0:
-            for element in range(len(first_photo)):
-                mse = (1 / 256) * np.sum(first_photo[element] - second_photo[element]) ** 2
-            return mse
+        mse = float()
+        rmse = float()
+        
+        for element in range(len(first_photo)):
+            mse += (1/len(first_photo)) * (first_photo[element] - second_photo[element]) ** 2
+            result = np.sum(mse)
 
         if method == 1:
-            for element in range(len(first_photo)):
-                rmse = np.sqrt((1 / 256) * np.sum(first_photo[element] - second_photo[element]) ** 2)
+            rmse = result ** 0.5
             return rmse
+
+        return result
