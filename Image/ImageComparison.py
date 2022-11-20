@@ -4,7 +4,7 @@ from ImageDiffMethod import *
 import numpy as np
 
 
-class ImageComparison(BaseImage):
+class ImageComparison(GrayScaleTransform):
     """
     Klasa reprezentujaca obraz, jego histogram oraz metody porównania
     """
@@ -14,15 +14,21 @@ class ImageComparison(BaseImage):
         metoda zwracajaca obiekt zawierajacy histogram biezacego obrazu (1- lub wielowarstwowy)
         """
 
-        return Histogram(self)
+        return Histogram(self.data)
+
 
     def compare_to(self, other: GrayScaleTransform, method: ImageDiffMethod) -> float:
         """
         metoda zwracajaca mse lub rmse dla dwoch obrazow
         """
 
-        first_photo = self.to_gray().histogram().values
-        second_photo = other.to_gray().histogram().values
+        if self.color_model != 4:
+            first_photo = Histogram(self.to_gray_data()).values
+        if other.color_model != 4:
+            second_photo = Histogram(other.to_gray_data()).values
+        else:
+            first_photo = Histogram(self.data).values
+            second_photo = Histogram(other.data).values
 
         mse = float()
         rmse = float()

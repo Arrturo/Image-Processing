@@ -1,6 +1,6 @@
 from ColorModel import *
 from matplotlib.image import imsave, imread
-from matplotlib.pyplot import imshow
+from matplotlib.pyplot import imshow, show, subplots, tight_layout
 import numpy as np
 np.seterr(over='ignore')
 
@@ -47,7 +47,7 @@ class BaseImage:
         """
 
         if self.color_model == 0:
-            R, G, B = np.squeeze(np.dsplit(self.data, self.data.shape[-1]))
+            R, G, B = np.squeeze(np.dsplit(self.data, self.data.shape[-1])) 
             
             H = np.zeros((R.shape[0], R.shape[1]))
             S = np.zeros((R.shape[0], R.shape[1]))
@@ -65,12 +65,12 @@ class BaseImage:
                     else:
                         S[i, j] = 0
 
-                    nominator = (R[i, j] - (0.5 * G[i, j]) - (0.5 * B[i, j]))
+                    nominator = R[i, j] - (0.5 * G[i, j]) - (0.5 * B[i, j])
                     denominator = (R[i, j] ** 2) + (G[i, j] ** 2) + (B[i, j] ** 2) - (R[i, j] * G[i, j]) - (R[i, j] * B[i, j]) - (G[i, j] * B[i, j])
                     if G[i, j] >= B[i, j]:
-                        H[i, j] = np.arccos(nominator / np.sqrt(denominator))
+                        H[i, j] = np.arccos(nominator / (np.sqrt(denominator) + 0.0000001))
                     else:
-                        H[i, j] = 360 - np.arccos(nominator / np.sqrt(denominator))
+                        H[i, j] = 360 - np.arccos(nominator / (np.sqrt(denominator) + 0.0000001))
 
             self.data = np.dstack((H, S, V))
             self.color_model = 1
@@ -81,6 +81,7 @@ class BaseImage:
         metoda dokonujaca konwersji obrazu w atrybucie data do modelu hsi
         metoda zwraca nowy obiekt klasy image zawierajacy obraz w docelowym modelu barw
         """
+
         if self.color_model == 0:
             R, G, B = np.float32(np.squeeze(np.dsplit(self.data, self.data.shape[-1])))
             
@@ -93,7 +94,7 @@ class BaseImage:
 
                     m = min(R[i, j], G[i, j], B[i, j])
 
-                    H[i][j] = 0.5 * ((R[i][j] - G[i][j]) + (R[i][j] - B[i][j])) / np.sqrt((R[i][j] - G[i][j]) ** 2 + ((R[i][j] - B[i][j]) * (G[i][j] - B[i][j])))
+                    H[i][j] = 0.5 * ((R[i][j] - G[i][j]) + (R[i][j] - B[i][j])) / np.sqrt((R[i][j] - G[i][j]) ** 2 + ((R[i][j] - B[i][j]) * (G[i][j] - B[i][j]) + 0.0000001))
                     H[i][j] = np.arccos(H[i][j]) 
 
                     if B[i][j] <= G[i][j]:
@@ -101,7 +102,7 @@ class BaseImage:
                     else:
                         H[i][j] = (360 * np.pi) / (180 - H[i][j])
 
-                    S[i, j] = 1 - (3 * (m / (R[i, j] + G[i, j] + B[i, j])))
+                    S[i, j] = 1 - (3 * (m / (R[i, j] + G[i, j] + B[i, j] + 0.0000001)))
                     I[i, j] = (R[i, j] + G[i, j] + B[i, j]) / 3.0
 
             self.data = np.dstack((H, S, I))
@@ -113,6 +114,7 @@ class BaseImage:
         metoda dokonujaca konwersji obrazu w atrybucie data do modelu hsl
         metoda zwraca nowy obiekt klasy image zawierajacy obraz w docelowym modelu barw
         """
+
         if self.color_model == 0:
             R, G, B = np.squeeze(np.dsplit(self.data, self.data.shape[-1]))
             
@@ -136,9 +138,9 @@ class BaseImage:
                     nominator = (int(R[i, j]) - (0.5 * int(G[i, j])) - (0.5 * int(B[i, j])))
                     denominator = (int(R[i, j]) ** 2) + (int(G[i, j]) ** 2) + (int(B[i, j]) ** 2) - (int(R[i, j]) * int(G[i, j])) - (int(R[i, j]) * int(B[i, j])) - (int(G[i, j]) * int(B[i, j]))
                     if G[i, j] >= B[i, j]:
-                        H[i, j] = np.arccos(nominator / np.sqrt(denominator)) * 180 / np.pi 
+                        H[i, j] = np.arccos(nominator / (np.sqrt(denominator) + 0.0000001)) * 180 / np.pi 
                     if B[i, j] > G[i, j]:
-                        H[i, j] = 360 - np.arccos(nominator / np.sqrt(denominator)) * 180 / np.pi 
+                        H[i, j] = 360 - np.arccos(nominator / (np.sqrt(denominator) + 0.0000001)) * 180 / np.pi 
 
             self.data = np.dstack((H, S, L))
             self.color_model = 3
@@ -149,6 +151,7 @@ class BaseImage:
         metoda dokonujaca konwersji obrazu w atrybucie data do modelu rgb
         metoda zwraca nowy obiekt klasy image zawierajacy obraz w docelowym modelu barw
         """
+
         if self.color_model == 0:
             raise "Image is already in RGB model"
 
@@ -277,3 +280,11 @@ class BaseImage:
         self.data = np.dstack((R, G, B)).astype('uint16')
         self.color_model = 0
         return self      
+
+def show_3img(photo1: 'BaseImage', photo2: 'BaseImage', photo3: 'BaseImage') -> None:
+    f, photo = subplots(1, 3, figsize=(10, 10))
+    photo[0].imshow(photo1.data)
+    photo[1].imshow(photo2.data)
+    photo[2].imshow(photo3.data)
+    tight_layout()
+    show()

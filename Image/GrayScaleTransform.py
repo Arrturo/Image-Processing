@@ -6,18 +6,22 @@ class GrayScaleTransform(BaseImage):
     def __init__(self, path: str) -> None:
         super().__init__(path)
 
-    def to_gray(self) -> 'BaseImage':
-        """
-        metoda zwracajaca obraz w skali szarosci jako obiekt klasy BaseImage
-        """
+    def to_gray_data(self) -> np.ndarray:
 
         if self.color_model == 0:
             R, G, B = np.squeeze(np.dsplit(self.data, self.data.shape[-1]))
             gray_img = 0.2989 * R + 0.587 * G + 0.114 * B
 
-            self.data = gray_img
-            self.color_model = 4
-            return self
+            return gray_img
+
+    def to_gray(self) -> 'BaseImage':
+        """
+        metoda zwracajaca obraz w skali szarosci jako obiekt klasy BaseImage
+        """
+
+        self.data = self.to_gray_data()
+        self.color_model = 4
+        return self
 
     def to_sepia(self, alpha_beta: tuple = (None, None), w: int = None) -> 'BaseImage':
         """
