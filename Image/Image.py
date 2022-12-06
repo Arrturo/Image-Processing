@@ -1,7 +1,8 @@
 from ImageComparison import *
-from GrayScaleTransform import *
+from ImageAligning import *
 
-class Image(GrayScaleTransform, ImageComparison):
+
+class Image(ImageComparison, ImageAligning):
     """
     klasa stanowiaca glowny interfejs biblioteki
     """

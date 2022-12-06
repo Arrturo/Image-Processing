@@ -37,3 +37,13 @@ class Histogram:
             plt.plot(self.bin_edges[:-1], self.values, color='gray')
 
         plt.show()
+
+    def to_cumulated(self) -> 'Histogram':
+        """
+        metoda zwracajaca histogram skumulowany na podstawie stanu wewnetrznego obiektu
+        """
+
+        if self.values.ndim == 1:
+            self.values = np.cumsum(self.values)
+
+        return self
