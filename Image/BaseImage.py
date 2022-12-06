@@ -1,3 +1,4 @@
+from typing import Optional
 from ColorModel import *
 from matplotlib.image import imsave, imread
 from matplotlib.pyplot import imshow, show, subplots, tight_layout
@@ -9,13 +10,13 @@ class BaseImage:
     data: np.ndarray  # tensor przechowujacy piksele obrazu
     color_model: ColorModel  # atrybut przechowujacy biezacy model barw obrazu
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str, color_model: Optional[ColorModel] = 0) -> None:
         """
         inicjalizator wczytujacy obraz do atrybutu data na podstawie sciezki
         """
 
         self.data = imread(path)
-        self.color_model = 0
+        self.color_model = color_model
 
     def save_img(self, path: str) -> None:
         """
