@@ -1,3 +1,4 @@
+import numpy as np
 from Histogram import *
 
 
@@ -33,9 +34,12 @@ class ImageAligning(BaseImage):
         metoda wyrównująca histogram obrazu
         """
         if self.color_model == 0:
-            for i, channel in enumerate(['R', 'G', 'B']):
-                channel = self.align_channel(self.data[:, :, i], tail_elimination)
-                self.data = np.dstack(channel)
+            R = self.align_channel(self.data[..., 0], tail_elimination)
+            G = self.align_channel(self.data[..., 1], tail_elimination)
+            B = self.align_channel(self.data[..., 2], tail_elimination)
+
+            self.data = np.dstack((R, G, B))
+                # self.data[:, :, i] = self.align_channel(img_data, tail_elimination)
 
         if self.color_model == 4:
             self.data = self.align_channel(self.data, tail_elimination)

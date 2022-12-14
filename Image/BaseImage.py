@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from ColorModel import *
 from matplotlib.image import imsave, imread
 from matplotlib.pyplot import imshow, show, subplots, tight_layout
@@ -10,13 +10,21 @@ class BaseImage:
     data: np.ndarray  # tensor przechowujacy piksele obrazu
     color_model: ColorModel  # atrybut przechowujacy biezacy model barw obrazu
 
-    def __init__(self, path: str, color_model: Optional[ColorModel] = 0) -> None:
+    def __init__(self, path: Union[str, np.ndarray], color_model: Optional[ColorModel] = 0) -> None:
         """
         inicjalizator wczytujacy obraz do atrybutu data na podstawie sciezki
         """
+        if type(path) == str:
+            self.data = imread(path)
+        else:
+            self.data = path
 
-        self.data = imread(path)
         self.color_model = color_model
+
+        if self.data.ndim == 3:
+            self.color_model = 0
+        if self.data.ndim == 2:
+            self.color_model = 4
 
     def save_img(self, path: str) -> None:
         """
@@ -285,10 +293,11 @@ class BaseImage:
         self.color_model = 0
         return self      
 
-def show_3img(photo1: 'BaseImage', photo2: 'BaseImage', photo3: 'BaseImage') -> None:
-    f, photo = subplots(1, 3, figsize=(10, 10))
-    photo[0].imshow(photo1.data)
-    photo[1].imshow(photo2.data)
-    photo[2].imshow(photo3.data)
-    tight_layout()
-    show()
+    @staticmethod
+    def show_images(*images: 'BaseImage') -> None:
+        f, photo = subplots(1, len(images), figsize=(10, 10))
+        for i, img in enumerate(images):
+            photo[i].imshow(img.data, cmap=['gray' if img.color_model == 4 else None][0])
+
+        tight_layout()
+        show()

@@ -1,8 +1,9 @@
 from ImageComparison import *
 from ImageAligning import *
+from ImageFiltration import *
 
 
-class Image(ImageComparison, ImageAligning):
+class Image(ImageComparison, ImageAligning, ImageFiltration):
     """
     klasa stanowiaca glowny interfejs biblioteki
     """
