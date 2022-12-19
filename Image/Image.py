@@ -1,9 +1,10 @@
 from ImageComparison import *
 from ImageAligning import *
 from ImageFiltration import *
+from Thresholding import *
 
 
-class Image(ImageComparison, ImageAligning, ImageFiltration):
+class Image(ImageComparison, ImageAligning, ImageFiltration, Thresholding):
     """
     klasa stanowiaca glowny interfejs biblioteki
     """

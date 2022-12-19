@@ -10,7 +10,8 @@ class ImageAligning(BaseImage):
     def __init__(self, path: str, color_model: Optional[ColorModel] = 0) -> None:
         super().__init__(path, color_model)
 
-    def align_channel(self, channel: np.ndarray, tail_elimination: bool = False) -> np.ndarray:
+    @staticmethod
+    def __align_channel(channel: np.ndarray, tail_elimination: bool = False) -> np.ndarray:
         """
         metoda wyrównująca histogram danego kanału
         """
@@ -34,13 +35,13 @@ class ImageAligning(BaseImage):
         metoda wyrównująca histogram obrazu
         """
         if self.color_model == 0:
-            R = self.align_channel(self.data[..., 0], tail_elimination)
-            G = self.align_channel(self.data[..., 1], tail_elimination)
-            B = self.align_channel(self.data[..., 2], tail_elimination)
+            R = self.__align_channel(self.data[..., 0], tail_elimination)
+            G = self.__align_channel(self.data[..., 1], tail_elimination)
+            B = self.__align_channel(self.data[..., 2], tail_elimination)
 
             self.data = np.dstack((R, G, B))
                 # self.data[:, :, i] = self.align_channel(img_data, tail_elimination)
 
         if self.color_model == 4:
-            self.data = self.align_channel(self.data, tail_elimination)
+            self.data = self.__align_channel(self.data, tail_elimination)
         return self
