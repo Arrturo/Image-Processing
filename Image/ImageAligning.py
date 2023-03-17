@@ -1,5 +1,6 @@
 import numpy as np
 from Histogram import *
+import cv2
 
 
 class ImageAligning(BaseImage):
@@ -30,6 +31,7 @@ class ImageAligning(BaseImage):
 
         return channel.astype('uint8')
 
+
     def align_image(self, tail_elimination: bool = False) -> 'BaseImage':
         """
         metoda wyrównująca histogram obrazu
@@ -44,4 +46,30 @@ class ImageAligning(BaseImage):
 
         if self.color_model == 4:
             self.data = self.__align_channel(self.data, tail_elimination)
+        return self
+
+
+    def clache(self, clipLimit, tileGridSize) -> BaseImage:
+        """
+        Metoda CLAHE polega adaptywnym na ograniczaniu wysokich wartości na histogramie.
+        Po dokonaniu operacji wyrównana zostaje redystrybucja krańcowych wartości pikseli po całym obszarze obrazu.
+        Metoda CLAHE znacząco obniża również liczebnośc pikseli o wartościach granicznych.
+        """
+
+        if self.color_model == 4:
+            # clipLimit - wartość progu do limitowania kontrastu (wielkość odstawania barwy do zredukowania) tileGridSize
+            # - wielkość pojedynczych fragmentów, w ktorych wyrownywany jest histogram
+            # (wielkosc sasiedztwa ekstremów na histogramie)
+
+            clahe = cv2.createCLAHE(clipLimit, tileGridSize) #clipLimit=2.0, tileGridSize=(4, 4)
+            self.data = clahe.apply(self.data)
+
+        if self.color_model == 0:
+            image_lab = cv2.cvtColor(self.data, cv2.COLOR_RGB2LAB)
+            clahe = cv2.createCLAHE(clipLimit, tileGridSize) #clipLimit=2.0, tileGridSize=(8, 8)
+            image_lab[..., 0] = clahe.apply(image_lab[..., 0])
+            color_equalized = cv2.cvtColor(image_lab, cv2.COLOR_LAB2RGB)
+
+            self.data = color_equalized
+
         return self

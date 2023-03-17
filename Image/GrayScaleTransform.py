@@ -14,7 +14,7 @@ class GrayScaleTransform(BaseImage):
         if self.color_model == 4:
             gray_img = self.get_layer(0)
 
-        return gray_img
+        return gray_img.astype("uint8")
 
     def to_gray(self) -> 'BaseImage':
         """
@@ -23,6 +23,7 @@ class GrayScaleTransform(BaseImage):
 
         self.data = self.to_gray_data()
         self.color_model = 4
+
         return self
 
     def to_sepia(self, alpha_beta: tuple = (None, None), w: int = None) -> 'BaseImage':

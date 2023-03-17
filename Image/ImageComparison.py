@@ -30,12 +30,12 @@ class ImageComparison(GrayScaleTransform):
             first_photo = Histogram(self.data).values
             second_photo = Histogram(other.data).values
 
+        result = float()
         mse = float()
-        rmse = float()
-        
+
         for element in range(len(first_photo)):
             mse += (1/len(first_photo)) * (first_photo[element] - second_photo[element]) ** 2
-            result = np.sum(mse)
+            result = mse
 
         if method == 1:
             rmse = result ** 0.5

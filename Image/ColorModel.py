@@ -2,9 +2,9 @@ from enum import Enum
 
 
 class ColorModel(Enum):
-    rgb = 0
-    hsv = 1
-    hsi = 2
-    hsl = 3
-    gray = 4  # obraz 2d
-    sepia = 5
+    RGB = 0
+    HSV = 1
+    HSI = 2
+    HSL = 3
+    GRAY = 4  # obraz 2d
+    SEPIA = 5

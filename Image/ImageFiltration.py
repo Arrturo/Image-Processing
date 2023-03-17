@@ -5,8 +5,9 @@ import numpy as np
 
 class ImageFiltration:
     @staticmethod
-    def __conv_channel(image: np.ndarray, kernel: np.ndarray, prefix: Optional[float]=None) -> np.ndarray:
+    def __conv_channel(image: np.ndarray, kernel: np.ndarray, prefix: Optional[float] = None) -> np.ndarray:
         output_image = np.zeros((image.data.shape[0], image.data.shape[1]))
+
         if prefix is None:
             prefix = 1
 
@@ -15,12 +16,13 @@ class ImageFiltration:
 
                 for m in range(kernel.shape[0]):
                     for n in range(kernel.shape[1]):
-                        output_image[i, j] += kernel[m, n] * image[i - m, j - n]
+                        output_image[i][j] += kernel[m][n] * image[i - m][j - n]
 
         output_image *= prefix
         output_image[output_image < 0] = 0
         output_image[output_image > 255] = 255
         return output_image.astype('uint8')
+
 
     @staticmethod
     def conv_2d(image: BaseImage, kernel: np.ndarray, prefix: Optional[float] = None) -> BaseImage:
