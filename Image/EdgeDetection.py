@@ -44,3 +44,23 @@ class EdgeDetection(GrayScaleTransform):
         
         self.data = org
         return self
+    
+
+    def hough_lines(self, image: GrayScaleTransform, rgb: tuple, rho=2, theta=(np.pi/180), threshold=30, minLineLength=0, maxLineGap=0) -> np.ndarray:
+        """
+        rho – odległość w pikselach, z jaką dokładnością szukamy linii
+        theta – dokładność w radianach, z jaką szukamy linii
+        threshold – minimalna liczba punktów, które muszą być na linii, aby została ona zwrócona
+        minLineLength – minimalna długość linii, która może zostać zwrócona
+        maxLineGap – maksymalna odległość między punktami, które są rozdzielone na linii, aby została ona zwrócona
+        """
+
+        lines = cv2.HoughLinesP(self.data, rho,
+                                theta, threshold, minLineLength, maxLineGap)
+
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            cv2.line(image.data, (x1, y1), (x2, y2), rgb, 5)
+
+        self.data = cv2.cvtColor(self.data, cv2.COLOR_GRAY2RGB)
+        return self
