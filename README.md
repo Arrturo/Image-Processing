@@ -1,5 +1,14 @@
 # Machine Graphics
-This repository contains Python implementations of various operations on images:
+This repository contains Python implementations of various operations on images
+
+## Table of contents
+* [General info](#machine-graphics)
+* [Features](#features)
+* [Technologies](#technologies)
+* [Get Started](#get-started)
+* [Usage](#usage)
+
+## Features
 - [HSV, HSI, HSL convertion](https://github.com/Arrturo/Machine-Graphics/blob/main/lab2/main.ipynb)
 - [Sepia, Grayscale image conversion](https://github.com/Arrturo/Machine-Graphics/blob/main/lab3/main.ipynb)
 - [image histogram](https://github.com/Arrturo/Machine-Graphics/blob/main/lab4/main.ipynb)
@@ -8,12 +17,6 @@ This repository contains Python implementations of various operations on images:
 - [*convolution*](https://github.com/Arrturo/Machine-Graphics/blob/main/lab6/main.ipynb)
 - [*treshold*](https://github.com/Arrturo/Machine-Graphics/blob/main/lab7/main.ipynb)
 - [*edge and circle detection*](https://github.com/Arrturo/Machine-Graphics/blob/main/lab8/lab8.ipynb)
-
-## Table of contents
-* [General info](#machine-graphics)
-* [Technologies](#technologies)
-* [Get Started](#get-started)
-* [Usage](#usage)
 
 ## Technologies:
 1. Python 3.10
