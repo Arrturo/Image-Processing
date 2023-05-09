@@ -5,8 +5,8 @@ This repository contains Python implementations of various operations on images
 * [General info](#machine-graphics)
 * [Features](#features)
 * [Technologies](#technologies)
+* [Installation](#installation)
 * [Get Started](#get-started)
-* [Usage](#usage)
 
 ## Features
 - [HSV, HSI, HSL convertion](https://github.com/Arrturo/Machine-Graphics/blob/main/lab2/main.ipynb)
@@ -18,13 +18,13 @@ This repository contains Python implementations of various operations on images
 - [*treshold*](https://github.com/Arrturo/Machine-Graphics/blob/main/lab7/main.ipynb)
 - [*edge and circle detection*](https://github.com/Arrturo/Machine-Graphics/blob/main/lab8/lab8.ipynb)
 
-## Technologies:
+## Technologies
 1. Python 3.10
 2. NumPy
 3. Matplotlib
 4. OpenCV
 
-## Get Started:
+## Installation
 1. Clone the repository to your local machine:
 ```
 git clone https://github.com/Arrturo/Machine-Graphics.git
@@ -40,7 +40,7 @@ You can also install all needed libraries with ```requirements.txt``` file:
 pip install -r requirements.txt
 ```
 
-## Usage
+## Get Started
 To use repo, you first need to import the Image class:
 ```python
 from Image import Image
